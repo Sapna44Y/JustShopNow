@@ -9,6 +9,7 @@ import SummaryApi from "../common/SummaryApi";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
+import { pricewithDiscount } from "../utils/PriceWithDiscount";
 
 const CheckoutPage = () => {
   const {
@@ -23,6 +24,10 @@ const CheckoutPage = () => {
   const [selectAddress, setSelectAddress] = useState(0);
   const cartItemsList = useSelector((state) => state.cartItem.cart);
   const navigate = useNavigate();
+
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+  };
 
   const handleCashOnDelivery = async () => {
     try {
@@ -46,9 +51,15 @@ const CheckoutPage = () => {
         if (fetchOrder) {
           fetchOrder();
         }
+        // Pass order details to success page
         navigate("/success", {
           state: {
             text: "Order",
+            orderItems: cartItemsList,
+            orderTotal: totalPrice,
+            orderId: responseData.orderId || responseData.data?._id,
+            paymentMethod: "Cash on Delivery",
+            address: addressList[selectAddress],
           },
         });
       }
@@ -75,6 +86,16 @@ const CheckoutPage = () => {
 
       const { data: responseData } = response;
 
+      // Store order details in sessionStorage for success page after payment
+      sessionStorage.setItem(
+        "pendingOrder",
+        JSON.stringify({
+          orderItems: cartItemsList,
+          orderTotal: totalPrice,
+          address: addressList[selectAddress],
+        }),
+      );
+
       stripePromise.redirectToCheckout({ sessionId: responseData.id });
 
       if (fetchCartItem) {
@@ -87,8 +108,9 @@ const CheckoutPage = () => {
       AxiosToastError(error);
     }
   };
+
   return (
-    <section className="bg-blue-50">
+    <section className="bg-blue-50 min-h-screen">
       <div className="container mx-auto p-4 flex flex-col lg:flex-row w-full gap-5 justify-between">
         <div className="w-full">
           {/***address***/}
@@ -97,6 +119,7 @@ const CheckoutPage = () => {
             {addressList.map((address, index) => {
               return (
                 <label
+                  key={index}
                   htmlFor={"address" + index}
                   className={!address.status && "hidden"}
                 >
@@ -106,7 +129,10 @@ const CheckoutPage = () => {
                         id={"address" + index}
                         type="radio"
                         value={index}
-                        onChange={(e) => setSelectAddress(e.target.value)}
+                        checked={selectAddress === index}
+                        onChange={(e) =>
+                          setSelectAddress(parseInt(e.target.value))
+                        }
                         name="address"
                       />
                     </div>
@@ -130,6 +156,59 @@ const CheckoutPage = () => {
               Add address
             </div>
           </div>
+
+          {/***Order Summary Items***/}
+          {cartItemsList.length > 0 && (
+            <div className="mt-6 bg-white p-4">
+              <h3 className="text-lg font-semibold mb-3">Your Items</h3>
+              <div className="space-y-3 max-h-96 overflow-auto">
+                {cartItemsList.map((item, index) => (
+                  <div key={index} className="flex gap-3 border-b pb-3">
+                    <div
+                      className="w-16 h-16 bg-gray-100 rounded overflow-hidden cursor-pointer"
+                      onClick={() => handleProductClick(item?.productId?._id)}
+                    >
+                      <img
+                        src={item?.productId?.image?.[0]}
+                        alt={item?.productId?.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p
+                        className="font-medium cursor-pointer hover:text-blue-600"
+                        onClick={() => handleProductClick(item?.productId?._id)}
+                      >
+                        {item?.productId?.name}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {item?.productId?.unit}
+                      </p>
+                      <p className="text-sm font-semibold">
+                        Qty: {item?.quantity} ×{" "}
+                        {DisplayPriceInRupees(
+                          pricewithDiscount(
+                            item?.productId?.price,
+                            item?.productId?.discount,
+                          ),
+                        )}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">
+                        {DisplayPriceInRupees(
+                          pricewithDiscount(
+                            item?.productId?.price,
+                            item?.productId?.discount,
+                          ) * item?.quantity,
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="w-full max-w-md bg-white py-4 px-2">
@@ -147,29 +226,42 @@ const CheckoutPage = () => {
               </p>
             </div>
             <div className="flex gap-4 justify-between ml-1">
-              <p>Quntity total</p>
-              <p className="flex items-center gap-2">{totalQty} item</p>
+              <p>Quantity total</p>
+              <p className="flex items-center gap-2">{totalQty} item(s)</p>
             </div>
             <div className="flex gap-4 justify-between ml-1">
               <p>Delivery Charge</p>
               <p className="flex items-center gap-2">Free</p>
             </div>
-            <div className="font-semibold flex items-center justify-between gap-4">
+            <div className="font-semibold flex items-center justify-between gap-4 border-t pt-2 mt-2">
               <p>Grand total</p>
               <p>{DisplayPriceInRupees(totalPrice)}</p>
             </div>
           </div>
+
+          {addressList.length === 0 && (
+            <div className="text-red-500 text-sm text-center mb-4">
+              Please add an address to proceed
+            </div>
+          )}
+
           <div className="w-full flex flex-col gap-4">
             <button
-              className="py-2 px-4 bg-green-600 hover:bg-green-700 rounded text-white font-semibold"
+              className={`py-2 px-4 bg-green-600 hover:bg-green-700 rounded text-white font-semibold ${
+                addressList.length === 0 && "opacity-50 cursor-not-allowed"
+              }`}
               onClick={handleOnlinePayment}
+              disabled={addressList.length === 0}
             >
               Online Payment
             </button>
 
             <button
-              className="py-2 px-4 border-2 border-green-600 font-semibold text-green-600 hover:bg-green-600 hover:text-white"
+              className={`py-2 px-4 border-2 border-green-600 font-semibold text-green-600 hover:bg-green-600 hover:text-white ${
+                addressList.length === 0 && "opacity-50 cursor-not-allowed"
+              }`}
               onClick={handleCashOnDelivery}
+              disabled={addressList.length === 0}
             >
               Cash on Delivery
             </button>

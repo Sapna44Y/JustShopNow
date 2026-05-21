@@ -26,6 +26,14 @@ const DisplayCartItem = ({ close }) => {
     }
     toast("Please Login");
   };
+
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+    if (close) {
+      close();
+    }
+  };
+
   return (
     <section className="bg-neutral-900 fixed top-0 bottom-0 right-0 left-0 bg-opacity-70 z-50">
       <div className="bg-white w-full max-w-sm min-h-screen max-h-screen ml-auto">
@@ -55,16 +63,27 @@ const DisplayCartItem = ({ close }) => {
                     return (
                       <div
                         key={item?._id + "cartItemDisplay"}
-                        className="flex  w-full gap-4"
+                        className="flex w-full gap-4"
                       >
-                        <div className="w-16 h-16 min-h-16 min-w-16 bg-red-500 border rounded">
+                        <div
+                          className="w-16 h-16 min-h-16 min-w-16 bg-red-500 border rounded cursor-pointer overflow-hidden"
+                          onClick={() =>
+                            handleProductClick(item?.productId?._id)
+                          }
+                        >
                           <img
                             src={item?.productId?.image[0]}
-                            className="object-scale-down"
+                            className="w-full h-full object-cover"
+                            alt={item?.productId?.name}
                           />
                         </div>
-                        <div className="w-full max-w-sm text-xs">
-                          <p className="text-xs text-ellipsis line-clamp-2">
+                        <div className="w-full max-w-sm text-xs flex-1">
+                          <p
+                            className="text-xs text-ellipsis line-clamp-2 cursor-pointer hover:text-blue-600"
+                            onClick={() =>
+                              handleProductClick(item?.productId?._id)
+                            }
+                          >
                             {item?.productId?.name}
                           </p>
                           <p className="text-neutral-400">
@@ -98,7 +117,7 @@ const DisplayCartItem = ({ close }) => {
                   </p>
                 </div>
                 <div className="flex gap-4 justify-between ml-1">
-                  <p>Quntity total</p>
+                  <p>Quantity total</p>
                   <p className="flex items-center gap-2">{totalQty} item</p>
                 </div>
                 <div className="flex gap-4 justify-between ml-1">
@@ -116,6 +135,7 @@ const DisplayCartItem = ({ close }) => {
               <img
                 src={imageEmpty}
                 className="w-full h-full object-scale-down"
+                alt="Empty cart"
               />
               <Link
                 onClick={close}
