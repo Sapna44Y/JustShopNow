@@ -154,6 +154,11 @@ const SummaryApi = {
     url: "/api/order/order-list",
     method: "get",
   },
+
+  switchUserRole: {
+    url: "/api/user/switch-role",
+    method: "put",
+  },
 };
 
 export default SummaryApi;

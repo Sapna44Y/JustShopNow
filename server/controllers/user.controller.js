@@ -518,3 +518,53 @@ export async function userDetails(request, response) {
     });
   }
 }
+
+// Switch user role controller
+export async function switchUserRoleController(request, response) {
+  try {
+    const userId = request.userId; // auth middleware
+    const { role } = request.body;
+
+    // Validate role
+    if (!role || !["USER", "ADMIN"].includes(role)) {
+      return response.status(400).json({
+        message: "Invalid role. Role must be either USER or ADMIN",
+        error: true,
+        success: false,
+      });
+    }
+
+    // Get current user to check their current role
+    const currentUser = await UserModel.findById(userId);
+
+    if (!currentUser) {
+      return response.status(404).json({
+        message: "User not found",
+        error: true,
+        success: false,
+      });
+    }
+
+    // Update user role
+    const updateUser = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        role: role,
+      },
+      { new: true }, // Return the updated document
+    ).select("-password -refresh_token");
+
+    return response.json({
+      message: `Role switched to ${role} successfully`,
+      error: false,
+      success: true,
+      data: updateUser,
+    });
+  } catch (error) {
+    return response.status(500).json({
+      message: error.message || error,
+      error: true,
+      success: false,
+    });
+  }
+}
