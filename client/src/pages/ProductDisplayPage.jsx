@@ -55,76 +55,125 @@ const ProductDisplayPage = () => {
     imageContainer.current.scrollLeft -= 100;
   };
 
-  console.log("product data", data);
-
   return (
-    <section className="container mx-auto p-4 grid lg:grid-cols-2">
-      <div className="">
-        <div className="bg-white lg:min-h-[65vh] lg:max-h-[65vh] rounded min-h-56 max-h-56 h-full w-full">
-          <img
-            src={data.image[image]}
-            className="w-full h-full object-scale-down"
-            alt={data.name}
-          />
-        </div>
-        <div className="flex items-center justify-center gap-3 my-2">
-          {data.image.map((img, index) => {
-            return (
-              <div
-                key={img + index + "point"}
-                className={`bg-slate-200 w-3 h-3 lg:w-5 lg:h-5 rounded-full ${index === image && "bg-slate-300"}`}
-              ></div>
-            );
-          })}
-        </div>
-        <div className="grid relative">
-          <div
-            ref={imageContainer}
-            className="flex gap-4 z-10 relative w-full overflow-x-auto scrollbar-none"
-          >
+    <section className="container mx-auto p-4 grid lg:grid-cols-2 gap-6">
+      {/* Left Column - Product Images + Why Shop Section */}
+      <div className="flex flex-col gap-4">
+        {/* Product Images */}
+        <div>
+          <div className="bg-white lg:min-h-[65vh] lg:max-h-[65vh] rounded min-h-56 max-h-56 h-full w-full">
+            <img
+              src={data.image[image]}
+              className="w-full h-full object-scale-down"
+              alt={data.name}
+            />
+          </div>
+          <div className="flex items-center justify-center gap-3 my-2">
             {data.image.map((img, index) => {
               return (
                 <div
-                  className="w-20 h-20 min-h-20 min-w-20 scr cursor-pointer shadow-md"
-                  key={img + index}
-                >
-                  <img
-                    src={img}
-                    alt="min-product"
-                    onClick={() => setImage(index)}
-                    className="w-full h-full object-scale-down"
-                  />
-                </div>
+                  key={img + index + "point"}
+                  className={`bg-slate-200 w-3 h-3 lg:w-5 lg:h-5 rounded-full ${index === image && "bg-slate-300"}`}
+                ></div>
               );
             })}
           </div>
-          <div className="w-full -ml-3 h-full hidden lg:flex justify-between absolute items-center">
-            <button
-              onClick={handleScrollLeft}
-              className="z-10 bg-white relative p-1 rounded-full shadow-lg"
+          <div className="grid relative">
+            <div
+              ref={imageContainer}
+              className="flex gap-4 z-10 relative w-full overflow-x-auto scrollbar-none"
             >
-              <FaAngleLeft />
-            </button>
-            <button
-              onClick={handleScrollRight}
-              className="z-10 bg-white relative p-1 rounded-full shadow-lg"
-            >
-              <FaAngleRight />
-            </button>
+              {data.image.map((img, index) => {
+                return (
+                  <div
+                    className="w-20 h-20 min-h-20 min-w-20 scr cursor-pointer shadow-md"
+                    key={img + index}
+                  >
+                    <img
+                      src={img}
+                      alt="min-product"
+                      onClick={() => setImage(index)}
+                      className="w-full h-full object-scale-down"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <div className="w-full -ml-3 h-full hidden lg:flex justify-between absolute items-center">
+              <button
+                onClick={handleScrollLeft}
+                className="z-10 bg-white relative p-1 rounded-full shadow-lg"
+              >
+                <FaAngleLeft />
+              </button>
+              <button
+                onClick={handleScrollRight}
+                className="z-10 bg-white relative p-1 rounded-full shadow-lg"
+              >
+                <FaAngleRight />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Product Details Section - Hidden on mobile, visible on desktop */}
-        <div className="my-4 hidden lg:grid gap-3">
-          <ProductDetails data={data} />
+        {/* Why shop from JustShoppingNow? Section - Left Side Below Images */}
+        <div className="mt-4">
+          <h2 className="font-semibold text-lg mb-4">
+            Why shop from JustShoppingNow?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Superfast Delivery */}
+            <div className="flex flex-col items-center text-center gap-2">
+              <img
+                src={image1}
+                alt="superfast delivery"
+                className="w-16 h-16 object-contain"
+              />
+              <div className="font-semibold">Superfast Delivery</div>
+              <p className="text-sm text-gray-600">
+                Get your order delivered to your doorstep at the earliest from
+                dark stores near you.
+              </p>
+            </div>
+
+            {/* Best Prices & Offers */}
+            <div className="flex flex-col items-center text-center gap-2">
+              <img
+                src={image2}
+                alt="Best prices offers"
+                className="w-16 h-16 object-contain"
+              />
+              <div className="font-semibold">Best Prices & Offers</div>
+              <p className="text-sm text-gray-600">
+                Best price destination with offers directly from the
+                manufacturers.
+              </p>
+            </div>
+
+            {/* Wide Assortment */}
+            <div className="flex flex-col items-center text-center gap-2">
+              <img
+                src={image3}
+                alt="Wide Assortment"
+                className="w-16 h-16 object-contain"
+              />
+              <div className="font-semibold">Wide Assortment</div>
+              <p className="text-sm text-gray-600">
+                Choose from 5000+ products across food personal care, household
+                & other categories.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="p-4 lg:pl-7 text-base lg:text-lg">
+      {/* Right Column - Product Info (Name, Price, Stock, Details) */}
+      <div className="p-4 lg:pl-0 text-base lg:text-lg flex flex-col gap-3">
         <p className="bg-green-300 w-fit px-2 rounded-full">10 Min</p>
         <h2 className="text-lg font-semibold lg:text-3xl">{data.name}</h2>
         <p className="">{data.unit}</p>
         <Divider />
+
         <div>
           <p className="">Price</p>
           <div className="flex items-center gap-2 lg:gap-4">
@@ -155,53 +204,19 @@ const ProductDisplayPage = () => {
           </div>
         )}
 
-        <h2 className="font-semibold">Why shop from JustShoppingNow?</h2>
-        <div>
-          <div className="flex items-center gap-4 my-4">
-            <img src={image1} alt="superfast delivery" className="w-20 h-20" />
-            <div className="text-sm">
-              <div className="font-semibold">Superfast Delivery</div>
-              <p>
-                Get your order delivered to your doorstep at the earliest from
-                dark stores near you.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 my-4">
-            <img src={image2} alt="Best prices offers" className="w-20 h-20" />
-            <div className="text-sm">
-              <div className="font-semibold">Best Prices & Offers</div>
-              <p>
-                Best price destination with offers directly from the
-                manufacturers.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 my-4">
-            <img src={image3} alt="Wide Assortment" className="w-20 h-20" />
-            <div className="text-sm">
-              <div className="font-semibold">Wide Assortment</div>
-              <p>
-                Choose from 5000+ products across food personal care, household
-                & other categories.
-              </p>
-            </div>
-          </div>
-        </div>
+        <Divider />
 
-        {/* Product Details Section - Visible only on mobile */}
-        <div className="my-4 grid gap-3 lg:hidden">
-          <ProductDetails data={data} />
-        </div>
+        {/* Product Details Section - On Right Side */}
+        <ProductDetails data={data} />
       </div>
     </section>
   );
 };
 
-// Create a separate component for product details to avoid code duplication
+// Product Details Component
 const ProductDetails = ({ data }) => {
   return (
-    <>
+    <div className="flex flex-col gap-3">
       <div>
         <p className="font-semibold">Description</p>
         <p className="text-base">{data.description}</p>
@@ -219,7 +234,7 @@ const ProductDetails = ({ data }) => {
             </div>
           );
         })}
-    </>
+    </div>
   );
 };
 
