@@ -1,1 +1,1 @@
-# JustShoppingNow
+# JustShopNow full stack MERN APP
